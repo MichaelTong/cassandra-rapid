@@ -17,6 +17,8 @@
  */
 package org.apache.cassandra.service;
 
+import com.vrg.rapid.Cluster;
+import com.google.common.net.HostAndPort;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -152,6 +154,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
     private final List<Runnable> preShutdownHooks = new ArrayList<>();
     private final List<Runnable> postShutdownHooks = new ArrayList<>();
 
+    public Cluster cluster;
     public static final StorageService instance = new StorageService();
 
     @Deprecated
@@ -576,6 +579,13 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         }
     }
 
+    private void initRapidCluster() 
+    {
+        String addr = FBUtilities.getLocalAddress().getHostAddress();
+        int port = 7002;
+        HostAndPort host = HostAndPort.fromParts(addr, port);
+        
+    }
     public synchronized void initServer() throws ConfigurationException
     {
         initServer(RING_DELAY);
