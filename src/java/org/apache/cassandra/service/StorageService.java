@@ -585,7 +585,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         String addr = FBUtilities.getLocalAddress().getHostAddress();
         int port = 7002;
         HostAndPort host = HostAndPort.fromParts(addr, port);
-        logger.info("Rapid cluster instance will start at {}:{}", addr, port);
+        logger.info("### Rapid cluster instance will start at {}:{}", addr, port);
         Iterator<InetAddress> addrSeeds = DatabaseDescriptor.getSeeds().iterator();
         String addrSeed = addrSeeds.next().getHostAddress();
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
@@ -620,28 +620,28 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
      * Executed whenever a Cluster VIEW_CHANGE_PROPOSAL event occurs.
      */
     private void onViewChangeProposal(final List<NodeStatusChange> viewChange) {
-        logger.info("The condition detector has outputted a proposal: {}", viewChange);
+        logger.info("### The condition detector has outputted a proposal: {}", viewChange);
     }
 
     /**
      * Executed whenever a Cluster VIEW_CHANGE_ONE_STEP_FAILED event occurs.
      */
     private void onViewChangeOneStepFailed(final List<NodeStatusChange> viewChange) {
-        logger.info("The condition detector had a conflict during one-step consensus: {}", viewChange);
+        logger.info("### The condition detector had a conflict during one-step consensus: {}", viewChange);
     }
 
     /**
      * Executed whenever a Cluster KICKED event occurs.
      */
     private void onKicked(final List<NodeStatusChange> viewChange) {
-        logger.info("We got kicked from the network: {}", viewChange);
+        logger.info("### We got kicked from the network: {}", viewChange);
     }
 
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
      */
     private void onViewChange(final List<NodeStatusChange> viewChange) {
-        logger.info("View change detected: ", viewChange);
+        logger.info("### View change detected: ", viewChange);
     }
 
     public synchronized void initServer() throws ConfigurationException
