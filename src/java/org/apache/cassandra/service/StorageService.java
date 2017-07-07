@@ -695,6 +695,8 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
             return;
         }
 
+        initRapidCluster();
+
         prepareToJoin();
 
         // Has to be called after the host id has potentially changed in prepareToJoin().
