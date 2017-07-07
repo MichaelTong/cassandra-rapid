@@ -190,7 +190,7 @@ public class PendingAntiCompaction
             tasks.add(task);
         }
         ListenableFuture<List<AcquireResult>> acquisitionResults = Futures.successfulAsList(tasks);
-        ListenableFuture compactionResult = Futures.transform(acquisitionResults, new AcquisitionCallback(prsId, ranges));
+        ListenableFuture compactionResult = Futures.transformAsync(acquisitionResults, new AcquisitionCallback(prsId, ranges));
         return compactionResult;
     }
 }

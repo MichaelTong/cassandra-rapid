@@ -251,7 +251,7 @@ public class CoordinatorSession extends ConsistentSession
         ListenableFuture<Boolean> prepareResult = prepare(executor);
 
         // run repair sessions normally
-        ListenableFuture<List<RepairSessionResult>> repairSessionResults = Futures.transform(prepareResult, new AsyncFunction<Boolean, List<RepairSessionResult>>()
+        ListenableFuture<List<RepairSessionResult>> repairSessionResults = Futures.transformAsync(prepareResult, new AsyncFunction<Boolean, List<RepairSessionResult>>()
         {
             public ListenableFuture<List<RepairSessionResult>> apply(Boolean success) throws Exception
             {
@@ -269,7 +269,7 @@ public class CoordinatorSession extends ConsistentSession
         });
 
         // mark propose finalization
-        ListenableFuture<Boolean> proposeFuture = Futures.transform(repairSessionResults, new AsyncFunction<List<RepairSessionResult>, Boolean>()
+        ListenableFuture<Boolean> proposeFuture = Futures.transformAsync(repairSessionResults, new AsyncFunction<List<RepairSessionResult>, Boolean>()
         {
             public ListenableFuture<Boolean> apply(List<RepairSessionResult> results) throws Exception
             {
