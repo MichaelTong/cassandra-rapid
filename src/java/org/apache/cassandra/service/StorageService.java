@@ -695,7 +695,14 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
             return;
         }
 
-        initRapidCluster();
+        try
+        {
+            initRapidCluster();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Error starting rapid cluster", t);
+        }
 
         prepareToJoin();
 
