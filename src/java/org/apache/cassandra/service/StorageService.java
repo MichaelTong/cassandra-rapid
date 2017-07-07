@@ -18,6 +18,7 @@
 package org.apache.cassandra.service;
 
 import com.vrg.rapid.Cluster;
+import com.vrg.rapid.NodeStatusChange;
 import com.google.common.net.HostAndPort;
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -584,8 +585,61 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         String addr = FBUtilities.getLocalAddress().getHostAddress();
         int port = 7002;
         HostAndPort host = HostAndPort.fromParts(addr, port);
+        logger.info("Rapid cluster instance will start at {}:{}", addr, port);
+        if (isSeed())
+        {
+            cluster = new Cluster.Builder(host)
+                .setMetadata(Collections.singletonMap("role", "Seed"))
+                .start();
+        }
+        else 
+        {
+            cluster = new Cluster.Builder(host)
+                .setMetadata(Collections.singletonMap("role", "NonSeed"))
+                .start();
+        }
         
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_PROPOSAL,
+                this::onViewChangeProposal);
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE,
+                this::onViewChange);
+
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_ONE_STEP_FAILED,
+                this::onViewChangeOneStepFailed);
+
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.KICKED,
+                this::onKicked);
     }
+
+
+    /**
+     * Executed whenever a Cluster VIEW_CHANGE_PROPOSAL event occurs.
+     */
+    private void onViewChangeProposal(final List<NodeStatusChange> viewChange) {
+        logger.info("The condition detector has outputted a proposal: {}", viewChange);
+    }
+
+    /**
+     * Executed whenever a Cluster VIEW_CHANGE_ONE_STEP_FAILED event occurs.
+     */
+    private void onViewChangeOneStepFailed(final List<NodeStatusChange> viewChange) {
+        logger.info("The condition detector had a conflict during one-step consensus: {}", viewChange);
+    }
+
+    /**
+     * Executed whenever a Cluster KICKED event occurs.
+     */
+    private void onKicked(final List<NodeStatusChange> viewChange) {
+        logger.info("We got kicked from the network: {}", viewChange);
+    }
+
+    /**
+     * Executed whenever a Cluster VIEW_CHANGE event occurs.
+     */
+    private void onViewChange(final List<NodeStatusChange> viewChange) {
+        logger.info("View change detected: ", viewChange);
+    }
+
     public synchronized void initServer() throws ConfigurationException
     {
         initServer(RING_DELAY);
