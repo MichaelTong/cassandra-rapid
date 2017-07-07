@@ -580,7 +580,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         }
     }
 
-    private void initRapidCluster() 
+    private void initRapidCluster() throws IOException, InterruptedException
     {
         String addr = FBUtilities.getLocalAddress().getHostAddress();
         int port = 7002;
