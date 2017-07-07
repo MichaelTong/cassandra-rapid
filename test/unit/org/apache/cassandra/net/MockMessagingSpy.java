@@ -53,7 +53,7 @@ public class MockMessagingSpy
      */
     public ListenableFuture<MessageIn<?>> captureMockedMessageIn()
     {
-        return Futures.transformAsync(captureMockedMessageInN(1), (List<MessageIn<?>> result) -> result.isEmpty() ? null : result.get(0));
+        return Futures.transform(captureMockedMessageInN(1), (List<MessageIn<?>> result) -> result.isEmpty() ? null : result.get(0));
     }
 
     /**
@@ -89,7 +89,7 @@ public class MockMessagingSpy
      */
     public ListenableFuture<MessageOut<?>> captureMessageOut()
     {
-        return Futures.transformAsync(captureMessageOut(1), (List<MessageOut<?>> result) -> result.isEmpty() ? null : result.get(0));
+        return Futures.transform(captureMessageOut(1), (List<MessageOut<?>> result) -> result.isEmpty() ? null : result.get(0));
     }
 
     /**
