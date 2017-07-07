@@ -586,6 +586,10 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         int port = 7002;
         HostAndPort host = HostAndPort.fromParts(addr, port);
         logger.info("Rapid cluster instance will start at {}:{}", addr, port);
+        Iterator<InetAddress> addrSeeds = DatabaseDescriptor.getSeeds().iterator();
+        String addrSeed = addrSeeds.next().getHostAddress();
+        HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
+
         if (isSeed())
         {
             cluster = new Cluster.Builder(host)
@@ -596,7 +600,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         {
             cluster = new Cluster.Builder(host)
                 .setMetadata(Collections.singletonMap("role", "NonSeed"))
-                .start();
+                .join(hostSeed);
         }
         
         cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_PROPOSAL,
