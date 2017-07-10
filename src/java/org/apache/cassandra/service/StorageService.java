@@ -17,9 +17,7 @@
  */
 package org.apache.cassandra.service;
 
-import com.vrg.rapid.Cluster;
-import com.vrg.rapid.NodeStatusChange;
-import com.google.common.net.HostAndPort;
+
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
