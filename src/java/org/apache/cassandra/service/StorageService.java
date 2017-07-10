@@ -594,19 +594,21 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         {
             cluster = new Cluster.Builder(host)
                 .setMetadata(Collections.singletonMap("role", "Seed"))
+                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                 .start();
         }
         else 
         {
             cluster = new Cluster.Builder(host)
                 .setMetadata(Collections.singletonMap("role", "NonSeed"))
+                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                 .join(hostSeed);
         }
         
         cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_PROPOSAL,
                 this::onViewChangeProposal);
-        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE,
-                this::onViewChange);
+        //cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE,
+        //        this::onViewChange);
 
         cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_ONE_STEP_FAILED,
                 this::onViewChangeOneStepFailed);
