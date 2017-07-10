@@ -1326,7 +1326,7 @@ private void initRapidCluster() throws IOException, InterruptedException
         String addrSeed = addrSeeds.next().getHostAddress();
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
 
-        if (isSeed())
+        if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
         {
             cluster = new Cluster.Builder(host)
                 .setMetadata(Collections.singletonMap("role", "Seed"))
