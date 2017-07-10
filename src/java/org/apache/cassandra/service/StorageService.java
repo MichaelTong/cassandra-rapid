@@ -17,9 +17,6 @@
  */
 package org.apache.cassandra.service;
 
-import com.vrg.rapid.Cluster;
-import com.vrg.rapid.NodeStatusChange;
-import com.google.common.net.HostAndPort;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -155,7 +152,6 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
     private final List<Runnable> preShutdownHooks = new ArrayList<>();
     private final List<Runnable> postShutdownHooks = new ArrayList<>();
 
-    public Cluster cluster;
     public static final StorageService instance = new StorageService();
 
     @Deprecated
@@ -580,71 +576,6 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         }
     }
 
-    private void initRapidCluster() throws IOException, InterruptedException
-    {
-        String addr = FBUtilities.getLocalAddress().getHostAddress();
-        int port = 7002;
-        HostAndPort host = HostAndPort.fromParts(addr, port);
-        logger.info("### Rapid cluster instance will start at {}:{}", addr, port);
-        Iterator<InetAddress> addrSeeds = DatabaseDescriptor.getSeeds().iterator();
-        String addrSeed = addrSeeds.next().getHostAddress();
-        HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
-
-        if (isSeed())
-        {
-            cluster = new Cluster.Builder(host)
-                .setMetadata(Collections.singletonMap("role", "Seed"))
-                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
-                .start();
-        }
-        else 
-        {
-            cluster = new Cluster.Builder(host)
-                .setMetadata(Collections.singletonMap("role", "NonSeed"))
-                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
-                .join(hostSeed);
-        }
-        
-        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_PROPOSAL,
-                this::onViewChangeProposal);
-        //cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE,
-        //        this::onViewChange);
-
-        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_ONE_STEP_FAILED,
-                this::onViewChangeOneStepFailed);
-
-        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.KICKED,
-                this::onKicked);
-    }
-
-
-    /**
-     * Executed whenever a Cluster VIEW_CHANGE_PROPOSAL event occurs.
-     */
-    private void onViewChangeProposal(final List<NodeStatusChange> viewChange) {
-        logger.info("[[[### The condition detector has outputted a proposal: {} ###]]]", viewChange);
-    }
-
-    /**
-     * Executed whenever a Cluster VIEW_CHANGE_ONE_STEP_FAILED event occurs.
-     */
-    private void onViewChangeOneStepFailed(final List<NodeStatusChange> viewChange) {
-        logger.info("[[[### The condition detector had a conflict during one-step consensus: {} ###]]]", viewChange);
-    }
-
-    /**
-     * Executed whenever a Cluster KICKED event occurs.
-     */
-    private void onKicked(final List<NodeStatusChange> viewChange) {
-        logger.info("[[[### We got kicked from the network: {} ###]]]", viewChange);
-    }
-
-    /**
-     * Executed whenever a Cluster VIEW_CHANGE event occurs.
-     */
-    private void onViewChange(final List<NodeStatusChange> viewChange) {
-        logger.info("[[[### View change detected: {} ###]]]", viewChange);
-    }
 
     public synchronized void initServer() throws ConfigurationException
     {
@@ -699,15 +630,6 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
             loadRingState();
             initialized = true;
             return;
-        }
-
-        try
-        {
-            initRapidCluster();
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Error starting rapid cluster", t);
         }
 
         prepareToJoin();

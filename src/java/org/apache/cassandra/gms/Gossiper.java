@@ -17,6 +17,10 @@
  */
 package org.apache.cassandra.gms;
 
+import com.vrg.rapid.Cluster;
+import com.vrg.rapid.NodeStatusChange;
+import com.google.common.net.HostAndPort;
+
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -86,6 +90,8 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     public final static int intervalInMillis = 1000;
     public final static int QUARANTINE_DELAY = StorageService.RING_DELAY * 2;
     private static final Logger logger = LoggerFactory.getLogger(Gossiper.class);
+
+    public Cluster cluster;
     public static final Gossiper instance = new Gossiper();
 
     public static final long aVeryLongTime = 259200 * 1000; // 3 days
@@ -1309,6 +1315,72 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
     }
 
+private void initRapidCluster() throws IOException, InterruptedException
+    {
+        String addr = FBUtilities.getLocalAddress().getHostAddress();
+        int port = 7002;
+        HostAndPort host = HostAndPort.fromParts(addr, port);
+        logger.info("[[[### Rapid cluster instance will start at {}:{}]]]", addr, port);
+        Iterator<InetAddress> addrSeeds = DatabaseDescriptor.getSeeds().iterator();
+        String addrSeed = addrSeeds.next().getHostAddress();
+        HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
+
+        if (isSeed())
+        {
+            cluster = new Cluster.Builder(host)
+                .setMetadata(Collections.singletonMap("role", "Seed"))
+                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
+                .start();
+        }
+        else 
+        {
+            cluster = new Cluster.Builder(host)
+                .setMetadata(Collections.singletonMap("role", "NonSeed"))
+                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
+                .join(hostSeed);
+        }
+        
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_PROPOSAL,
+                this::onViewChangeProposal);
+        //cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE,
+        //        this::onViewChange);
+
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_ONE_STEP_FAILED,
+                this::onViewChangeOneStepFailed);
+
+        cluster.registerSubscription(com.vrg.rapid.ClusterEvents.KICKED,
+                this::onKicked);
+    }
+
+
+    /**
+     * Executed whenever a Cluster VIEW_CHANGE_PROPOSAL event occurs.
+     */
+    private void onViewChangeProposal(final List<NodeStatusChange> viewChange) {
+        logger.info("[[[### The condition detector has outputted a proposal: {} ###]]]", viewChange);
+    }
+
+    /**
+     * Executed whenever a Cluster VIEW_CHANGE_ONE_STEP_FAILED event occurs.
+     */
+    private void onViewChangeOneStepFailed(final List<NodeStatusChange> viewChange) {
+        logger.info("[[[### The condition detector had a conflict during one-step consensus: {} ###]]]", viewChange);
+    }
+
+    /**
+     * Executed whenever a Cluster KICKED event occurs.
+     */
+    private void onKicked(final List<NodeStatusChange> viewChange) {
+        logger.info("[[[### We got kicked from the network: {} ###]]]", viewChange);
+    }
+
+    /**
+     * Executed whenever a Cluster VIEW_CHANGE event occurs.
+     */
+    private void onViewChange(final List<NodeStatusChange> viewChange) {
+        logger.info("[[[### View change detected: {} ###]]]", viewChange);
+    }
+
     public void start(int generationNumber)
     {
         start(generationNumber, new EnumMap<ApplicationState, VersionedValue>(ApplicationState.class));
@@ -1319,6 +1391,15 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
      */
     public void start(int generationNbr, Map<ApplicationState, VersionedValue> preloadLocalStates)
     {
+        try
+        {
+            initRapidCluster();
+        }
+        catch (Throwable t)
+        {
+            logger.warn("Error starting rapid cluster", t);
+        }
+        
         buildSeedsList();
         /* initialize the heartbeat state for this localEndpoint */
         maybeInitializeLocalState(generationNbr);
