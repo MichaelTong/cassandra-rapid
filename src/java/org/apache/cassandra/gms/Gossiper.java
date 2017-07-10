@@ -24,6 +24,7 @@ import com.google.common.net.HostAndPort;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -1399,7 +1400,7 @@ private void initRapidCluster() throws IOException, InterruptedException
         {
             logger.warn("Error starting rapid cluster", t);
         }
-        
+
         buildSeedsList();
         /* initialize the heartbeat state for this localEndpoint */
         maybeInitializeLocalState(generationNbr);
