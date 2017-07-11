@@ -1409,6 +1409,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     private void onViewChange(final List<NodeStatusChange> viewChange)
     {
         logger.info("[[[### View change detected: {} ###]]]", viewChange);
+        String selfAddr = FBUtilities.getLocalAddress().getHostAddress();
         Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
         for (NodeStatusChange change : viewChange) 
         {
@@ -1417,12 +1418,14 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             Metadata meta = change.getMetadata();
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
-                epState.put(addr, null); 
+                if (selfAddr != addr)
+                    epState.put(addr, null); 
             } catch (Exception e) {
                 logger.warn("[[[### Error handling host address ###]]]");
             }
         }
-        iExecutor.execute(new StateChangeTask(epState));
+        if (!epState.empty())
+            iExecutor.execute(new StateChangeTask(epState));
     }
 
     public void start(int generationNumber)
