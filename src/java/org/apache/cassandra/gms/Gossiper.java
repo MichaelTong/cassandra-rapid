@@ -1358,14 +1358,14 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
         {
             cluster = new Cluster.Builder(host)
-                .setMetadata(Collections.singletonMap("role", "Seed"))
+                .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
                 .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                 .start();
         }
         else 
         {
             cluster = new Cluster.Builder(host)
-                .setMetadata(Collections.singletonMap("role", "NonSeed"))
+                .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
                 .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                 .join(hostSeed);
         }
@@ -1419,8 +1419,8 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             Metadata meta = change.getMetadata();
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
-                if (!selfAddr.equals(addr.getHostAddress()))
-                    epState.put(addr, null); 
+                //if (!selfAddr.equals(addr.getHostAddress()))
+                epState.put(addr, null); 
             } catch (Exception e) {
                 logger.warn("[[[### Error handling host address ###]]]");
             }
