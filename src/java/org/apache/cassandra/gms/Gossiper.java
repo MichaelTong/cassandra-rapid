@@ -1418,7 +1418,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             Metadata meta = change.getMetadata();
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
-                if (selfAddr != addr)
+                if (selfAddr != addr.getHostAddress())
                     epState.put(addr, null); 
             } catch (Exception e) {
                 logger.warn("[[[### Error handling host address ###]]]");
