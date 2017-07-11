@@ -1417,10 +1417,10 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             Metadata meta = change.getMetadata();
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
+                epState.put(addr, null); 
             } catch (Exception e) {
                 logger.warn("[[[### Error handling host address ###]]]");
             }
-            epState.put(addr, null); 
         }
         iExecutor.execute(new StateChangeTask(epState));
     }
