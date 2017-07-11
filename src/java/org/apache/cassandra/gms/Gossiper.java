@@ -19,6 +19,8 @@ package org.apache.cassandra.gms;
 
 import com.vrg.rapid.Cluster;
 import com.vrg.rapid.NodeStatusChange;
+import com.vrg.rapid.pb.LinkStatus;
+import com.vrg.rapid.pb.Metadata;
 import com.google.common.net.HostAndPort;
 
 import java.lang.management.ManagementFactory;
@@ -74,7 +76,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     public static final String MBEAN_NAME = "org.apache.cassandra.net:type=Gossiper";
 
     private static final DebuggableScheduledThreadPoolExecutor executor = new DebuggableScheduledThreadPoolExecutor("GossipTasks");
-
+    private static final DebuggableThreadPoolExecutor iExecutor = new DebuggableThreadPoolExecutor("StateChange", 1);
     static final ApplicationState[] STATES = ApplicationState.values();
     static final List<String> DEAD_STATES = Arrays.asList(VersionedValue.REMOVING_TOKEN, VersionedValue.REMOVED_TOKEN,
                                                           VersionedValue.STATUS_LEFT, VersionedValue.HIBERNATE);
@@ -87,6 +89,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     }
 
     private volatile ScheduledFuture<?> scheduledGossipTask;
+    private volatile ScheduledFuture<?> scheduledStateChange;
     private static final ReentrantLock taskLock = new ReentrantLock();
     public final static int intervalInMillis = 1000;
     public final static int QUARANTINE_DELAY = StorageService.RING_DELAY * 2;
@@ -203,6 +206,30 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
     }
 
+    private class StateChangeTask implements Runnable
+    {
+        Map<InetAddress, EndpointState> epState;
+        public StateChangeTask(Map<InetAddress, EndpointState> toChange)
+        {
+            epState = toChange;
+        }
+        public run() {
+            try
+            {
+                applyStateLocally(epState);
+            }
+            catch (Exception e)
+            {
+                JVMStabilityInspector.inspectThrowable(e);
+                logger.error("State Change error", e);
+            }
+            finally
+            {
+                taskLock.unlock();
+            }
+        }
+    }
+    
     private Gossiper()
     {
         // half of QUARATINE_DELAY, to ensure justRemovedEndpoints has enough leeway to prevent re-gossip
@@ -1316,7 +1343,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
     }
 
-private void initRapidCluster() throws IOException, InterruptedException
+    private void initRapidCluster() throws IOException, InterruptedException
     {
         String addr = FBUtilities.getLocalAddress().getHostAddress();
         int port = 7002;
@@ -1380,6 +1407,16 @@ private void initRapidCluster() throws IOException, InterruptedException
      */
     private void onViewChange(final List<NodeStatusChange> viewChange) {
         logger.info("[[[### View change detected: {} ###]]]", viewChange);
+        Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
+        for (NodeStatusChange change : viewChange) 
+        {
+            HostAndPort host = change.getHostAndPort();
+            LinkStatus status = change.getStatus();
+            Metadata meta = change.getMetadata();
+            InetAddress addr = new InetAddress.getByName(host.getHost());
+            epState.put(HostAndPort, null); 
+        }
+        iExecutor.execute(new StateChangeTask(epState));
     }
 
     public void start(int generationNumber)
