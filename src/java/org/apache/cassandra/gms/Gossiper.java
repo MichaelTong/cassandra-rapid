@@ -1407,7 +1407,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
      */
     private void onViewChange(final List<NodeStatusChange> viewChange) throws UnknownHostException
-    {}
+    {
         logger.info("[[[### View change detected: {} ###]]]", viewChange);
         Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
         for (NodeStatusChange change : viewChange) 
