@@ -1406,7 +1406,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
      */
-    private void onViewChange(final List<NodeStatusChange> viewChange) throws UnknownHostException
+    private void onViewChange(final List<NodeStatusChange> viewChange)
     {
         logger.info("[[[### View change detected: {} ###]]]", viewChange);
         Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
@@ -1415,7 +1415,11 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             HostAndPort host = change.getHostAndPort();
             LinkStatus status = change.getStatus();
             Metadata meta = change.getMetadata();
-            InetAddress addr = InetAddress.getByName(host.getHost());
+            try {
+                InetAddress addr = InetAddress.getByName(host.getHost());
+            } catch (Exception e) {
+                logger.warn("[[[### Error handling host address ###]]]");
+            }
             epState.put(addr, null); 
         }
         iExecutor.execute(new StateChangeTask(epState));
