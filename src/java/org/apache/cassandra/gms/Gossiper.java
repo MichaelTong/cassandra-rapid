@@ -1424,7 +1424,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
                 logger.warn("[[[### Error handling host address ###]]]");
             }
         }
-        if (!epState.empty())
+        if (!epState.isEmpty())
             iExecutor.execute(new StateChangeTask(epState));
     }
 
