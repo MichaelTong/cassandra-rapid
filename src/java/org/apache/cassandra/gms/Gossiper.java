@@ -213,7 +213,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         {
             epState = toChange;
         }
-        public run() {
+        public void run() {
             try
             {
                 applyStateLocally(epState);
@@ -229,7 +229,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             }
         }
     }
-    
+
     private Gossiper()
     {
         // half of QUARATINE_DELAY, to ensure justRemovedEndpoints has enough leeway to prevent re-gossip
