@@ -1409,13 +1409,13 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
         Map<ApplicationState, VersionedValue> appStatesMap = new EnumMap<>(ApplicationState.class);
         String epsString = meta.getMetadataMap().get("eps");
-        String[] fields = epsString.split("||");
+        String[] fields = epsString.split("\\|\\|");
         int generation = Integer.parseInt(fields[0]);
         int version = Integer.parseInt(fields[1]);
         HeartBeatState initialHbState = new HeartBeatState(generation, version);
 
         int stateSize = Integer.parseInt(fields[2]);
-        String[] appStates = fields[3].split("|");
+        String[] appStates = fields[3].split("\\|");
         for (int i = 0; i < stateSize; i ++) {
             String stateKeyString = appStates[i].split(":")[0];
             String stateValueString = appStates[i].split(":")[1].split(",")[0];
@@ -1440,11 +1440,10 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             LinkStatus status = change.getStatus();
             Metadata meta = change.getMetadata();
             EndpointState eps = getEndpointStateFromRapidMeta(meta);
-            logger.info("This is wat I get {}", eps.toStringRapid());
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
                 //if (!selfAddr.equals(addr.getHostAddress()))
-                epState.put(addr, null); 
+                epState.put(addr, eps); 
             } catch (Exception e) {
                 logger.warn("[[[### Error handling host address ###]]]");
             }
