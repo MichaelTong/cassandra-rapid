@@ -1409,10 +1409,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
         Map<ApplicationState, VersionedValue> appStates = new EnumMap<>(ApplicationState.class);
         
-        appStates.put(ApplicationState.NET_VERSION, valueFactory.networkVersion());
-        appStates.put(ApplicationState.HOST_ID, valueFactory.hostId(localHostId));
-        appStates.put(ApplicationState.RPC_ADDRESS, valueFactory.rpcaddress(FBUtilities.getBroadcastRpcAddress()));
-        appStates.put(ApplicationState.RELEASE_VERSION, valueFactory.releaseVersion());
     }
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
