@@ -1345,7 +1345,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
     }
 
-    private void initRapidCluster() throws IOException, InterruptedException
+    public void initRapidCluster()
     {
         String addr = FBUtilities.getLocalAddress().getHostAddress();
         int port = 7002;
@@ -1355,19 +1355,26 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         String addrSeed = addrSeeds.next().getHostAddress();
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
 
-        if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
+        try
         {
-            cluster = new Cluster.Builder(host)
-                .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
-                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
-                .start();
+            if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
+            {
+                cluster = new Cluster.Builder(host)
+                    .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
+                    .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
+                    .start();
+            }
+            else 
+            {
+                cluster = new Cluster.Builder(host)
+                    .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
+                    .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
+                    .join(hostSeed);
+            }
         }
-        else 
+        catch (Throwable t)
         {
-            cluster = new Cluster.Builder(host)
-                .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
-                .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
-                .join(hostSeed);
+            logger.warn("Error starting rapid cluster", t);
         }
         
         cluster.registerSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE_PROPOSAL,
@@ -1467,15 +1474,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         maybeInitializeLocalState(generationNbr);
         EndpointState localState = endpointStateMap.get(FBUtilities.getBroadcastAddress());
         localState.addApplicationStates(preloadLocalStates);
-
-        try
-        {
-            initRapidCluster();
-        }
-        catch (Throwable t)
-        {
-            logger.warn("Error starting rapid cluster", t);
-        }
 
         //notify snitches that Gossiper is about to start
         DatabaseDescriptor.getEndpointSnitch().gossiperStarting();
