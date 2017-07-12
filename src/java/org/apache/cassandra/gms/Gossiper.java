@@ -1439,6 +1439,12 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
      */
     public void start(int generationNbr, Map<ApplicationState, VersionedValue> preloadLocalStates)
     {
+        buildSeedsList();
+        /* initialize the heartbeat state for this localEndpoint */
+        maybeInitializeLocalState(generationNbr);
+        EndpointState localState = endpointStateMap.get(FBUtilities.getBroadcastAddress());
+        localState.addApplicationStates(preloadLocalStates);
+
         try
         {
             initRapidCluster();
@@ -1447,13 +1453,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         {
             logger.warn("Error starting rapid cluster", t);
         }
-
-        buildSeedsList();
-        /* initialize the heartbeat state for this localEndpoint */
-        maybeInitializeLocalState(generationNbr);
-        EndpointState localState = endpointStateMap.get(FBUtilities.getBroadcastAddress());
-        localState.addApplicationStates(preloadLocalStates);
-
+        
         //notify snitches that Gossiper is about to start
         DatabaseDescriptor.getEndpointSnitch().gossiperStarting();
         if (logger.isTraceEnabled())
