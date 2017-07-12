@@ -1407,8 +1407,24 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
     {
 
-        //Map<ApplicationState, VersionedValue> appStates = new EnumMap<>(ApplicationState.class);
-        return null;
+        Map<ApplicationState, VersionedValue> appStatesMap = new EnumMap<>(ApplicationState.class);
+        String epsString = meta.get("eps");
+        String[] fields = epsString.split("||");
+        int generation = Integer.parseInt(fields[0]);
+        int version = Integer.parseInt(fields[1]);
+        HeartBeatState initialHbState = new HeartBeatState(generation, version);
+
+        int stateSize = Integer.parseInt(fields[2]);
+        String[] appStates = fields[3].split("|");
+        for (int i = 0; i < stateSize; i ++) {
+            String stateKeyString = appStates[i].split(":")[0];
+            String stateValueString = appStates[i].split(":")[1].split(",")[0];
+            String stateVersionString = appStates[i].split(":")[1].split(",")[1];
+
+            VersionedValue stateValue = new VersionedValue(stateValueString, Integer.parseInt(stateVersionString));
+            appStatesMap.put(ApplicationState.valueOf(stateKeyString), stateValue);
+        } 
+        return new EndpointState(initialHbState, appStatesMap);
     }
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
@@ -1423,7 +1439,8 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             HostAndPort host = change.getHostAndPort();
             LinkStatus status = change.getStatus();
             Metadata meta = change.getMetadata();
-            //EndpointState eps = getEndpointStateFromRapidMeta(meta);
+            EndpointState eps = getEndpointStateFromRapidMeta(meta);
+            logger.info("This is wat I get {}", eps.toStringRapid());
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
                 //if (!selfAddr.equals(addr.getHostAddress()))
