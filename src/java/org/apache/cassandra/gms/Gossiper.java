@@ -1436,7 +1436,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             logger.warn("Error From Bytes Rapid");
             epState = null;
         }
-        
+        logger.info("[[[### What I get: {} ###]]]", epState.toString());
         return epState;
     }
     /**
@@ -1461,7 +1461,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
                 logger.warn("[[[### Error handling host address ###]]]");
             }
         }
-        logger.info("[[[### What I get: {} ###]]]", epState.toString());
         if (!epState.isEmpty())
             iExecutor.execute(new StateChangeTask(epState));
     }
