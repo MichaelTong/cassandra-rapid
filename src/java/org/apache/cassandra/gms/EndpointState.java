@@ -161,7 +161,14 @@ public class EndpointState
 
     public String toStringRapid()
     {
-        return hbState.getGeneration() + "," + hbState.getHeartBeatVersion() + "," + applicationState.get();
+        String out = hbState.getGeneration() + "||" + hbState.getHeartBeatVersion() + "||";
+        
+        for (Map.Entry<ApplicationState, VersionedValue> state : states())
+        {
+            VersionedValue value = state.getValue();
+            out += state.getKey() + ":" + value.value + "," + value.version + "|";
+        }
+        return out;
     }
 }
 

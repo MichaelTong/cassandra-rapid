@@ -1404,6 +1404,16 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         logger.info("[[[### We got kicked from the network: {} ###]]]", viewChange);
     }
 
+    private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
+    {
+
+        Map<ApplicationState, VersionedValue> appStates = new EnumMap<>(ApplicationState.class);
+        
+        appStates.put(ApplicationState.NET_VERSION, valueFactory.networkVersion());
+        appStates.put(ApplicationState.HOST_ID, valueFactory.hostId(localHostId));
+        appStates.put(ApplicationState.RPC_ADDRESS, valueFactory.rpcaddress(FBUtilities.getBroadcastRpcAddress()));
+        appStates.put(ApplicationState.RELEASE_VERSION, valueFactory.releaseVersion());
+    }
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
      */
@@ -1417,6 +1427,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             HostAndPort host = change.getHostAndPort();
             LinkStatus status = change.getStatus();
             Metadata meta = change.getMetadata();
+            EndpointState eps = getEndpointStateFromRapidMeta(meta);
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
                 //if (!selfAddr.equals(addr.getHostAddress()))
@@ -1453,7 +1464,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         {
             logger.warn("Error starting rapid cluster", t);
         }
-        
+
         //notify snitches that Gossiper is about to start
         DatabaseDescriptor.getEndpointSnitch().gossiperStarting();
         if (logger.isTraceEnabled())
