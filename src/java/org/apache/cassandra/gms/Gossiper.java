@@ -1407,8 +1407,8 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
     {
 
-        Map<ApplicationState, VersionedValue> appStates = new EnumMap<>(ApplicationState.class);
-        return appStates;
+        //Map<ApplicationState, VersionedValue> appStates = new EnumMap<>(ApplicationState.class);
+        return null;
     }
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
@@ -1423,7 +1423,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             HostAndPort host = change.getHostAndPort();
             LinkStatus status = change.getStatus();
             Metadata meta = change.getMetadata();
-            EndpointState eps = getEndpointStateFromRapidMeta(meta);
+            //EndpointState eps = getEndpointStateFromRapidMeta(meta);
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
                 //if (!selfAddr.equals(addr.getHostAddress()))
