@@ -82,7 +82,7 @@ public class VersionedValue implements Comparable<VersionedValue>
     public final int version;
     public final String value;
 
-    private VersionedValue(String value, int version)
+    public VersionedValue(String value, int version)
     {
         assert value != null;
         // blindly interning everything is somewhat suboptimal -- lots of VersionedValues are unique --
@@ -93,7 +93,7 @@ public class VersionedValue implements Comparable<VersionedValue>
         this.version = version;
     }
 
-    private VersionedValue(String value)
+    public VersionedValue(String value)
     {
         this(value, VersionGenerator.getNextVersion());
     }
