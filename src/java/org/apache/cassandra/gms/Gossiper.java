@@ -1363,6 +1363,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
         catch (Exception e) {
             logger.warn("Error to Bytes Rapid");
+            bstring = null;
         }
 
         String epsString = bstring.toStringUtf8();
