@@ -1356,9 +1356,10 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         String addrSeed = addrSeeds.next().getHostAddress();
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
         EndpointState epState = getEndpointStateForEndpoint(FBUtilities.getLocalAddress());
+        ByteString bstring;
         try
         {
-            ByteString bstring = ByteString.CopyFrom(EndpointState.toBytesRapid(epState));
+            bstring = ByteString.CopyFrom(EndpointState.toBytesRapid(epState));
         }
         catch (Exception e) {
             logger.warn("Error to Bytes Rapid");
@@ -1425,7 +1426,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     {
         String epsString = meta.getMetadataMap().get("eps");
         ByteString bstring = ByteString.CopyFromUtf8(epsString);
-        Byte[] epsBytes = bstring.ToByteArray();
+        byte[] epsBytes = bstring.ToByteArray();
         try {
             EndpointState epState = EndpointState.fromBytesRapid(epsBytes);    
         } catch (Exception e) {
