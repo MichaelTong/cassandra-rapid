@@ -1408,7 +1408,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     {
 
         Map<ApplicationState, VersionedValue> appStates = new EnumMap<>(ApplicationState.class);
-        
+        return appStates;
     }
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
