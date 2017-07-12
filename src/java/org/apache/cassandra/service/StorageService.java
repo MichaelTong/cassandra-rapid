@@ -851,6 +851,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         if (DatabaseDescriptor.isAutoBootstrap() && !SystemKeyspace.bootstrapComplete() && DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
         {
             logger.info("This node will not auto bootstrap because it is configured to be a seed node.");
+            Gossiper.instance.initRapidCluster();
         }
 
         boolean dataAvailable = true; // make this to false when bootstrap streaming failed
