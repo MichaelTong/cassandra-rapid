@@ -954,7 +954,6 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
                 else
                     logger.info("Using saved tokens {}", bootstrapTokens);
             }
-            Gossiper.instance.initRapidCluster();
         }
 
         // if we don't have system_traces keyspace at this point, then create it manually
@@ -971,6 +970,10 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
                 {
                     for (InetAddress existing : current)
                         Gossiper.instance.replacedEndpoint(existing);
+                }
+                if (!bootstrap)
+                {
+                    Gossiper.instance.initRapidCluster();
                 }
             }
             else
