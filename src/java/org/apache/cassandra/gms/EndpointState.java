@@ -159,7 +159,7 @@ public class EndpointState
         return "EndpointState: HeartBeatState = " + hbState + ", AppStateMap = " + applicationState.get();
     }
 
-    public static byte[] toBytesRapid(EndpointState epState)
+    public static byte[] toBytesRapid(EndpointState epState) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
@@ -183,7 +183,7 @@ public class EndpointState
         return baos.toByteArray();
     }
 
-    public static EndpointState fromBytesRapid(byte[] inb)
+    public static EndpointState fromBytesRapid(byte[] inb) throws IOException
     {
         ByteArrayInputStream bais = new ByteArrayInputStream(inb);
         DataInputStream in = new DataInputStream(bais);
