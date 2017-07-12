@@ -1408,7 +1408,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     {
 
         Map<ApplicationState, VersionedValue> appStatesMap = new EnumMap<>(ApplicationState.class);
-        String epsString = meta.get("eps");
+        String epsString = meta.getMetadataMap().get("eps");
         String[] fields = epsString.split("||");
         int generation = Integer.parseInt(fields[0]);
         int version = Integer.parseInt(fields[1]);
