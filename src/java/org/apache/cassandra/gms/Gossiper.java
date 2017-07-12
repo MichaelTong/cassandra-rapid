@@ -1427,10 +1427,12 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         String epsString = meta.getMetadataMap().get("eps");
         ByteString bstring = ByteString.CopyFromUtf8(epsString);
         byte[] epsBytes = bstring.ToByteArray();
+        EndpointState epState;
         try {
-            EndpointState epState = EndpointState.fromBytesRapid(epsBytes);    
+            epState = EndpointState.fromBytesRapid(epsBytes);    
         } catch (Exception e) {
             logger.warn("Error From Bytes Rapid");
+            epState = null;
         }
         
         return epState;
