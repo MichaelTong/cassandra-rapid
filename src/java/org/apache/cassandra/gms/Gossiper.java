@@ -1421,7 +1421,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             String stateValueString = appStates[i].split(":")[1].split(",")[0];
             String stateVersionString = appStates[i].split(":")[1].split(",")[1];
 
-            VersionedValue stateValue = new VersionedValue(stateValueString, Integer.parseInt(stateVersionString));
+            VersionedValue stateValue = new VersionedValue(stateValueString);
             appStatesMap.put(ApplicationState.valueOf(stateKeyString), stateValue);
         } 
         return new EndpointState(initialHbState, appStatesMap);
