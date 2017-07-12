@@ -1359,13 +1359,13 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         ByteString bstring;
         try
         {
-            bstring = ByteString.CopyFrom(EndpointState.toBytesRapid(epState));
+            bstring = ByteString.copyFrom(EndpointState.toBytesRapid(epState));
         }
         catch (Exception e) {
             logger.warn("Error to Bytes Rapid");
         }
 
-        String epsString = bstring.ToStringUtf8();
+        String epsString = bstring.toStringUtf8();
         try
         {
             if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
@@ -1425,8 +1425,8 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
     {
         String epsString = meta.getMetadataMap().get("eps");
-        ByteString bstring = ByteString.CopyFromUtf8(epsString);
-        byte[] epsBytes = bstring.ToByteArray();
+        ByteString bstring = ByteString.copyFromUtf8(epsString);
+        byte[] epsBytes = bstring.toByteArray();
         EndpointState epState;
         try {
             epState = EndpointState.fromBytesRapid(epsBytes);    
