@@ -179,13 +179,14 @@ public class EndpointState
             out.writeUTF(value.value);
             out.writeInt(value.version);
         }
-        return out;
+        out.flush();
+        return baos.toByteArray();
     }
 
     public static EndpointState fromBytesRapid(byte[] inb)
     {
         ByteArrayInputStream bais = new ByteArrayInputStream(inb);
-        DataInputStream ins = new DataInputStream(bais);
+        DataInputStream in = new DataInputStream(bais);
 
         HeartBeatState hbState = new HeartBeatState(in.readInt(), in.readInt());
 

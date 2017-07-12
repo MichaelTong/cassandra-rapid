@@ -21,7 +21,7 @@ import com.vrg.rapid.Cluster;
 import com.vrg.rapid.NodeStatusChange;
 import com.vrg.rapid.pb.LinkStatus;
 import com.vrg.rapid.pb.Metadata;
-import com.google.protobuf.ByteString;
+import com.vrg.rapid.pb.ByteString;
 import com.google.common.net.HostAndPort;
 
 import java.lang.management.ManagementFactory;
