@@ -1357,6 +1357,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
         EndpointState epState = getEndpointStateForEndpoint(FBUtilities.getLocalAddress());
         ByteString bstring;
+        logger.info("[[[### What I will send: {} ###]]]", epState.toString());
         try
         {
             bstring = ByteString.copyFrom(EndpointState.toBytesRapid(epState));
