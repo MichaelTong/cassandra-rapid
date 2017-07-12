@@ -170,10 +170,11 @@ public class EndpointState
         {
             VersionedValue value = state.getValue();
             out += state.getKey() + ":" + value.value + "," + value.version ;
-            if (i == stateSize - 1) 
+            if (i != stateSize - 1) 
             {
                 out += "|";
             }
+            i++;
         }
         return out;
     }
