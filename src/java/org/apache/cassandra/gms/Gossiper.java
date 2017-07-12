@@ -21,6 +21,7 @@ import com.vrg.rapid.Cluster;
 import com.vrg.rapid.NodeStatusChange;
 import com.vrg.rapid.pb.LinkStatus;
 import com.vrg.rapid.pb.Metadata;
+import com.google.protobuf.ByteString;
 import com.google.common.net.HostAndPort;
 
 import java.lang.management.ManagementFactory;
@@ -1354,20 +1355,22 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         Iterator<InetAddress> addrSeeds = DatabaseDescriptor.getSeeds().iterator();
         String addrSeed = addrSeeds.next().getHostAddress();
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
-
+        EndpointState epState = getEndpointStateForEndpoint(FBUtilities.getLocalAddress());
+        ByteString bstring = ByteString.CopyFrom(EndpointState.toBytesRapid(epState));
+        String epsString = bstring.ToStringUtf8();
         try
         {
             if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
             {
                 cluster = new Cluster.Builder(host)
-                    .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
+                    .setMetadata(Collections.singletonMap("eps", epsString)
                     .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                     .start();
             }
             else 
             {
                 cluster = new Cluster.Builder(host)
-                    .setMetadata(Collections.singletonMap("eps", getEndpointStateForEndpoint(FBUtilities.getLocalAddress()).toStringRapid()))
+                    .setMetadata(Collections.singletonMap("eps", epsString)
                     .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                     .join(hostSeed);
             }
@@ -1413,25 +1416,11 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
     private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
     {
-
-        Map<ApplicationState, VersionedValue> appStatesMap = new EnumMap<>(ApplicationState.class);
         String epsString = meta.getMetadataMap().get("eps");
-        String[] fields = epsString.split("\\|\\|");
-        int generation = Integer.parseInt(fields[0]);
-        int version = Integer.parseInt(fields[1]);
-        HeartBeatState initialHbState = new HeartBeatState(generation, version);
-
-        int stateSize = Integer.parseInt(fields[2]);
-        String[] appStates = fields[3].split("\\|");
-        for (int i = 0; i < stateSize; i ++) {
-            String stateKeyString = appStates[i].split(":")[0];
-            String stateValueString = appStates[i].split(":")[1].split(",")[0];
-            String stateVersionString = appStates[i].split(":")[1].split(",")[1];
-
-            VersionedValue stateValue = new VersionedValue(stateValueString, Integer.parseInt(stateVersionString));
-            appStatesMap.put(ApplicationState.valueOf(stateKeyString), stateValue);
-        } 
-        return new EndpointState(initialHbState, appStatesMap);
+        ByteString bstring = ByteString.CopyFromUtf8(epsString);
+        Byte[] epsBytes = bstring.ToByteArray();
+        EndpointState epState = EndpointState.fromBytesRapid(epsBytes);
+        return epState;
     }
     /**
      * Executed whenever a Cluster VIEW_CHANGE event occurs.
@@ -1441,6 +1430,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         logger.info("[[[### View change detected: {} ###]]]", viewChange);
         String selfAddr = FBUtilities.getLocalAddress().getHostAddress();
         Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
+        logger.info("[[[### What I get: {} ###]]]", epState.toString());
         for (NodeStatusChange change : viewChange) 
         {
             HostAndPort host = change.getHostAndPort();

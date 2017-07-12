@@ -159,24 +159,50 @@ public class EndpointState
         return "EndpointState: HeartBeatState = " + hbState + ", AppStateMap = " + applicationState.get();
     }
 
-    public String toStringRapid()
+    public static byte[] toBytesRapid(EndpointState epState)
     {
-        String out = hbState.getGeneration() + "||" + hbState.getHeartBeatVersion() + "||";
-        int stateSize = states().size();
-        out += stateSize + "||";
-        
-        int i = 0;
-        for (Map.Entry<ApplicationState, VersionedValue> state : states())
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+
+        HeartBeatState hbState = epState.getHeartBeatState();
+        out.writeInt(hbState.getGeneration());
+        out.writeInt(hbState.getHeartBeatVersion());
+
+        Set<Map.Entry<ApplicationState, VersionedValue>> states = epState.states();
+        out.writeInt(states.size());
+
+        for (Map.Entry<ApplicationState, VersionedValue> state : states)
         {
             VersionedValue value = state.getValue();
-            out += state.getKey() + ":" + value.value + "," + value.version ;
-            if (i != stateSize - 1) 
-            {
-                out += "|";
-            }
-            i++;
+            out.writeInt(state.getKey().ordinal());
+
+            out.writeUTF(value.value);
+            out.writeInt(value.version);
         }
         return out;
+    }
+
+    public static EndpointState fromBytesRapid(byte[] inb)
+    {
+        ByteArrayInputStream bais = new ByteArrayInputStream(inb);
+        DataInputStream ins = new DataInputStream(bais);
+
+        HeartBeatState hbState = new HeartBeatState(in.readInt(), in.readInt());
+
+        int appStateSize = in.readInt();
+        Map<ApplicationState, VersionedValue> states = new EnumMap<>(ApplicationState.class);
+        for (int i = 0; i < appStateSize; ++i)
+        {
+            int key = in.readInt();
+
+            String value = in.readUTF();
+            int valVersion = in.readInt();
+            VersionedValue vvalue = new VersionedValue(value, valVersion);
+            states.put(Gossiper.STATES[key], vvalue);
+        }
+
+        return new EndpointState(hbState, states);
+
     }
 }
 
