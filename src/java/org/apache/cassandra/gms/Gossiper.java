@@ -1446,7 +1446,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         logger.info("[[[### View change detected: {} ###]]]", viewChange);
         String selfAddr = FBUtilities.getLocalAddress().getHostAddress();
         Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
-        logger.info("[[[### What I get: {} ###]]]", epState.toString());
         for (NodeStatusChange change : viewChange) 
         {
             HostAndPort host = change.getHostAndPort();
@@ -1461,6 +1460,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
                 logger.warn("[[[### Error handling host address ###]]]");
             }
         }
+        logger.info("[[[### What I get: {} ###]]]", epState.toString());
         if (!epState.isEmpty())
             iExecutor.execute(new StateChangeTask(epState));
     }
