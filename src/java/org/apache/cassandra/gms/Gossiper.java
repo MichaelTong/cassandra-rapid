@@ -1363,14 +1363,14 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
             {
                 cluster = new Cluster.Builder(host)
-                    .setMetadata(Collections.singletonMap("eps", epsString)
+                    .setMetadata(Collections.singletonMap("eps", epsString))
                     .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                     .start();
             }
             else 
             {
                 cluster = new Cluster.Builder(host)
-                    .setMetadata(Collections.singletonMap("eps", epsString)
+                    .setMetadata(Collections.singletonMap("eps", epsString))
                     .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                     .join(hostSeed);
             }
