@@ -180,8 +180,6 @@ public class EndpointState
             out.writeInt(value.version);
         }
         out.flush();
-        logger.info("byte size {}", baos.toByteArray().length);
-        logger.info("bytestring: {}", ByteString.copyFrom(baos.toByteArray()).toStringUtf8());
         return baos.toByteArray();
     }
 

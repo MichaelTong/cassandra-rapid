@@ -1367,7 +1367,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
 
         String epsString = bstring.toStringUtf8();
-        logger.info("[[[### What I will send: {} ###]]]", epsString);
+        logger.info("[[[### is valid utf8?: {} ###]]]", bstring.isValidUtf8());
         try
         {
             if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
@@ -1436,8 +1436,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             logger.warn("Error From Bytes Rapid");
             epState = null;
         }
-        logger.info("Size: {}", epsBytes.length);
-        logger.info("[[[### What I get: {} ###]]]", epsString);
         return epState;
     }
     /**
