@@ -1436,7 +1436,8 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             logger.warn("Error From Bytes Rapid");
             epState = null;
         }
-        logger.info("[[[### What I get: {} ###]]]", epState.toString());
+        logger.info("Size: {}", epsBytes.length);
+        logger.info("[[[### What I get: {} ###]]]", epsString);
         return epState;
     }
     /**
@@ -1444,7 +1445,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
      */
     private void onViewChange(final List<NodeStatusChange> viewChange)
     {
-        logger.info("[[[### View change detected: {} ###]]]", viewChange);
+        logger.info("[[[### View change detected ###]]]");
         String selfAddr = FBUtilities.getLocalAddress().getHostAddress();
         Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
         for (NodeStatusChange change : viewChange) 
