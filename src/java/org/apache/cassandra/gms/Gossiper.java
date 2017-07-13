@@ -1357,7 +1357,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         HostAndPort hostSeed = HostAndPort.fromParts(addrSeed, port);
         EndpointState epState = getEndpointStateForEndpoint(FBUtilities.getLocalAddress());
         ByteString bstring;
-        logger.info("[[[### What I will send: {} ###]]]", epState.toString());
         try
         {
             bstring = ByteString.copyFrom(EndpointState.toBytesRapid(epState));
@@ -1368,6 +1367,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
         }
 
         String epsString = bstring.toStringUtf8();
+        logger.info("[[[### What I will send: {} ###]]]", epsString);
         try
         {
             if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))

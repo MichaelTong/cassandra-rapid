@@ -181,7 +181,7 @@ public class EndpointState
         }
         out.flush();
         logger.info("byte size {}", baos.toByteArray().length);
-        logger.info("bytestring: {}", ByteString.copyFrom(baso.toByteArray()).toStringUtf8());
+        logger.info("bytestring: {}", ByteString.copyFrom(baos.toByteArray()).toStringUtf8());
         return baos.toByteArray();
     }
 
