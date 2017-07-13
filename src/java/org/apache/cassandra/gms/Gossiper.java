@@ -1433,7 +1433,6 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             logger.warn("Error From Bytes Rapid");
             epState = null;
         }
-        logger.info("EPS get: {}", epState.toString());
         return epState;
     }
     /**
