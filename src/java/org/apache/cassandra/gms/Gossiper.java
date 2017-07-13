@@ -210,16 +210,16 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
     private class StateChangeTask implements Runnable
     {
-        Map<InetAddress, EndpointState> epState;
+        Map<InetAddress, EndpointState> epStateMap;
         public StateChangeTask(Map<InetAddress, EndpointState> toChange)
         {
-            epState = toChange;
+            epStateMap = toChange;
         }
         public void run() {
             try
             {
                 taskLock.lock();
-                applyStateLocally(epState);
+                applyStateLocally(epStateMap, false);
             }
             catch (Exception e)
             {
@@ -1186,7 +1186,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
                     // assume some peer has corrupted memory and is broadcasting an unbelievable generation about another peer (or itself)
                     logger.warn("received an invalid gossip generation for peer {}; local time = {}, received generation = {}", ep, localTime, remoteGeneration);
                 }
-                else if (remoteGeneration > localGeneration)
+                else if (remoteGeneration > localGeneration && !handshaking)
                 {
                     if (logger.isTraceEnabled())
                         logger.trace("Updating heartbeat state generation to {} from {} for {}", remoteGeneration, localGeneration, ep);
@@ -1446,7 +1446,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
     {
         logger.info("[[[### View change detected ###]]]");
         String selfAddr = FBUtilities.getLocalAddress().getHostAddress();
-        Map<InetAddress, EndpointState> epState = new HashMap<InetAddress, EndpointState>();
+        Map<InetAddress, EndpointState> epStateMap = new HashMap<InetAddress, EndpointState>();
         for (NodeStatusChange change : viewChange) 
         {
             HostAndPort host = change.getHostAndPort();
@@ -1456,13 +1456,13 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             try {
                 InetAddress addr = InetAddress.getByName(host.getHost());
                 //if (!selfAddr.equals(addr.getHostAddress()))
-                epState.put(addr, eps); 
+                epStateMap.put(addr, eps); 
             } catch (Exception e) {
                 logger.warn("[[[### Error handling host address ###]]]");
             }
         }
-        if (!epState.isEmpty())
-            iExecutor.execute(new StateChangeTask(epState));
+        if (!epStateMap.isEmpty())
+            iExecutor.execute(new StateChangeTask(epStateMap));
     }
 
     public void start(int generationNumber)
