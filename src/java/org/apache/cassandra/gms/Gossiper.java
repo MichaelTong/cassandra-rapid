@@ -1424,7 +1424,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
     private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
     {
-        ByteString epsString = meta.getMetadataMap().get("eps");
+        ByteString bstring = meta.getMetadataMap().get("eps");
         byte[] epsBytes = bstring.toByteArray();
         EndpointState epState;
         try {
@@ -1433,6 +1433,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             logger.warn("Error From Bytes Rapid");
             epState = null;
         }
+        logger.info("EPS get: {}", epState.toString());
         return epState;
     }
     /**
