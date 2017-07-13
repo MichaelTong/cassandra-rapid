@@ -1366,21 +1366,19 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
             bstring = null;
         }
 
-        String epsString = bstring.toStringUtf8();
-        logger.info("[[[### is valid utf8?: {} ###]]]", bstring.isValidUtf8());
         try
         {
             if (DatabaseDescriptor.getSeeds().contains(FBUtilities.getBroadcastAddress()))
             {
                 cluster = new Cluster.Builder(host)
-                    .setMetadata(Collections.singletonMap("eps", epsString))
+                    .setMetadata(Collections.singletonMap("eps", bstring))
                     .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                     .start();
             }
             else 
             {
                 cluster = new Cluster.Builder(host)
-                    .setMetadata(Collections.singletonMap("eps", epsString))
+                    .setMetadata(Collections.singletonMap("eps", bstring))
                     .addSubscription(com.vrg.rapid.ClusterEvents.VIEW_CHANGE, this::onViewChange)
                     .join(hostSeed);
             }
@@ -1426,8 +1424,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
     private EndpointState getEndpointStateFromRapidMeta(Metadata meta)
     {
-        String epsString = meta.getMetadataMap().get("eps");
-        ByteString bstring = ByteString.copyFromUtf8(epsString);
+        ByteString epsString = meta.getMetadataMap().get("eps");
         byte[] epsBytes = bstring.toByteArray();
         EndpointState epState;
         try {
