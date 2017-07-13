@@ -46,6 +46,6 @@ public class GossipDigestAck2VerbHandler implements IVerbHandler<GossipDigestAck
         Map<InetAddress, EndpointState> remoteEpStateMap = message.payload.getEndpointStateMap();
         /* Notify the Failure Detector */
         Gossiper.instance.notifyFailureDetector(remoteEpStateMap);
-        //Gossiper.instance.applyStateLocally(remoteEpStateMap);
+        Gossiper.instance.applyStateLocally(remoteEpStateMap);
     }
 }

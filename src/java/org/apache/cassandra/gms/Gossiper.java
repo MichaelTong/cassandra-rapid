@@ -1149,6 +1149,10 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
 
     void applyStateLocally(Map<InetAddress, EndpointState> epStateMap)
     {
+        applyStateLocally(epStateMap, true);
+    }
+    void applyStateLocally(Map<InetAddress, EndpointState> epStateMap, boolean handshaking)
+    {
         for (Entry<InetAddress, EndpointState> entry : epStateMap.entrySet())
         {
             InetAddress ep = entry.getKey();
@@ -1211,7 +1215,7 @@ public class Gossiper implements IFailureDetectionEventListener, GossiperMBean
                         logger.trace("Ignoring remote generation {} < {}", remoteGeneration, localGeneration);
                 }
             }
-            else
+            else if (!handshaking)
             {
                 // this is a new node, report it to the FD in case it is the first time we are seeing it AND it's not alive
                 FailureDetector.instance.report(ep);

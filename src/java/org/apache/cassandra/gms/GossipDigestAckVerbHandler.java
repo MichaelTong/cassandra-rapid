@@ -55,7 +55,7 @@ public class GossipDigestAckVerbHandler implements IVerbHandler<GossipDigestAck>
         {
             /* Notify the Failure Detector */
             Gossiper.instance.notifyFailureDetector(epStateMap);
-            //Gossiper.instance.applyStateLocally(epStateMap);
+            Gossiper.instance.applyStateLocally(epStateMap);
         }
 
         if (Gossiper.instance.isInShadowRound())
