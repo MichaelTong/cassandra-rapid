@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 package org.apache.cassandra.gms;
-
+import com.google.protobuf.ByteString;
 import java.io.*;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -180,6 +180,8 @@ public class EndpointState
             out.writeInt(value.version);
         }
         out.flush();
+        logger.info("byte size {}", baos.toByteArray().length);
+        logger.info("bytestring: {}", ByteString.copyFrom(baso.toByteArray()).toStringUtf8());
         return baos.toByteArray();
     }
 
